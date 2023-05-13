@@ -3,6 +3,7 @@
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 
 /*
@@ -18,18 +19,15 @@ use App\Http\Controllers\ProductController;
 
 // Route::get('/products', [ProductController::class, 'index']);
 // Route::post('/products', [ProductController::class, 'store']);
-Route::resource('products', ProductController::class);
-Route::get('products/search/{name}', [ProductController::class, 'search']);
 
-// Route::get('/products', function() {
-//     return Product::create([
-//         'name' => 'Product One',
-//         'slug' => 'product-one',
-//         'description' => 'Product One and two',
-//         'price' => '999.99'
-//     ]);
-// });
+Route::prefix('v1')->group(function () {
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
+});
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::prefix('/v1')->middleware('auth:sanctum')->group(function () {
+    Route::resource('products', ProductController::class);
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('refresh', [AuthController::class, 'refreshToken']);
+    Route::get('products/search/{name}', [ProductController::class, 'search']);
 });
